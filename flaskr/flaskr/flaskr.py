@@ -1,15 +1,25 @@
 '''
+Created on 23 Mar 2017
+
+@author: Daniele
+'''
+'''
 Created on 21 Mar 2017
 
 @author: Daniele
 '''
 # all the imports
+import json
 import os
 import sqlite3
+import urllib.request
+
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
-     
-     
+
+
+#This Python program creates DB and only run at the first.
+#Everytime it will delete the old DB and create a new one 
 app = Flask(__name__) # create the application instance :)
 app.config.from_object(__name__) # load config from this file , flaskr.py
 
@@ -21,6 +31,7 @@ app.config.update(dict(
     PASSWORD='default'
 ))
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
+
 
 
 def connect_db():
@@ -51,10 +62,18 @@ def close_db(error):
         
         
 def init_db():
+    buffer = open("C:/Users/Daniele/workspaceComp30670/Dublin_bikes_project2/flaskr/flaskr/Dublin.json").read()
+    station_data=json.loads(buffer)
     db = get_db()
     with app.open_resource('schema.sql', mode='r') as f:
         db.cursor().executescript(f.read())
+        for i,line in enumerate(station_data):
+            db.execute("INSERT INTO station_info VALUES (?,?,?,?,?,?) ",(i,line["number"],line["name"],line["address"],line["latitude"],line["longitude"]))
+        db_update()
     db.commit()
+    
+
+
 
 @app.cli.command('initdb')
 def initdb_command():
@@ -66,21 +85,41 @@ def initdb_command():
 @app.route('/')
 def show_entries():
     db = get_db()
-    cur = db.execute('select title, text from entries order by id desc')
-    entries = cur.fetchall()
-    return render_template('show_entries.html', entries=entries)
+    cur = db.execute('SELECT * FROM station_info')
+    station_info = cur.fetchall()
+    cur2 = db.execute('SELECT * FROM dynamic_info')
+    dynamic_info = cur2.fetchall()
+    return render_template('show_entries.html', station_info=station_info,dynamic_info=dynamic_info)
 
 
-@app.route('/add', methods=['POST'])
-def add_entry():
-    if not session.get('logged_in'):
-        abort(401)
+def data_url():
+    api_key="8589319d92f1dd6754044ae453f8732f5009d77f"
+    link="https://api.jcdecaux.com/vls/v1/stations?contract=Dublin&apiKey={0}".format(api_key)
+    req=urllib.request.urlopen(link)
+    req_response = req.read().decode('utf-8')
+    content=json.loads(req_response)
+    return content
+
+def db_update():
     db = get_db()
-    db.execute('insert into entries (title, text) values (?, ?)',
-                 [request.form['title'], request.form['text']])
     db.commit()
-    flash('New entry was successfully posted')
-    return redirect(url_for('show_entries'))
+    read=data_url()
+    for i,line in enumerate(read):
+        db.execute("INSERT INTO dynamic_info VALUES (?,?,?,?,?,?,?) ",(i,line["number"],line["status"],line["bike_stands"],
+                                                                   line["available_bike_stands"],line["available_bikes"],line["last_update"]))
+    db.commit()
+
+@app.cli.command('db_update')
+def db_update_command():
+    """Updates the database."""
+    db_update()
+    print('Database updated.')
+
+
+
+
+
+
 
 
 
