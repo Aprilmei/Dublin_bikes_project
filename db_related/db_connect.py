@@ -24,12 +24,23 @@ print(station_data)
 for line in station_data:
     conn.execute("INSERT INTO station_info VALUES (?,?,?,?,?) ",(line["number"],line["name"],line["address"],line["latitude"],line["longitude"]))
 
-
-for row in conn.execute("SELECT * FROM station_info"):
+count=0
+for row in conn.execute("SELECT * FROM station_info order by number"):
+    count+=1
     print(row)
-    
+print("the row number of the table is ",count)    
+c=conn.cursor()
+'''
+n=c.execute("SELECT * FROM station_info").rowcount
+print("the row number of the table is ",n)
+'''
+c.execute("select * from station_info")
+results = c.fetchall()
+print("the length is ",len(results))
+
    
 conn.commit()
+
 conn.close()
 
 

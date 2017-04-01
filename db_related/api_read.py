@@ -8,8 +8,10 @@
 import requests
 import json
 import urllib.request
+from sqlalchemy import create_engine
+from db_related.db_info import *
 
-import sqlite3
+connectDB=create_engine("mysql+mysqldb://{}:{}@{}:{}/{}".format(name,password,rds_host,port,db_name ),echo=True)
 
 #using requests
 def dynamic_data():
@@ -35,21 +37,19 @@ read=data_url()
 
 #print("the dynamic data is ",read)
 def db_update():
-    conn=sqlite3.connect("bike.db")
     read=data_url()
     for line in read:
-        conn.execute("INSERT INTO dynamic_info VALUES (?,?,?,?,?,?) ",(line["number"],line["status"],line["bike_stands"],
-                                                                   line["available_bike_stands"],line["available_bikes"],line["last_update"]))
-    for row in conn.execute("SELECT * FROM dynamic_info"):
+        connectDB.execute("INSERT INTO dynamic_info VALUES (%s,%s,%s,%s,%s,%s) ",(line.get("number"),line.get("status"),line.get("bike_stands"),
+                                                                   line.get("available_bike_stands"),line.get("available_bikes"),line.get("last_update")))
+    for row in connectDB.execute("SELECT * FROM dynamic_info"):
         print(row)
     
     #check how many times we updated db from Dublin BIKE 
 
-    for row in conn.execute("SELECT * FROM dynamic_info WHERE number==42"):
+    for row in connectDB.execute("SELECT * FROM dynamic_info WHERE number=42"):
         print(row)
     
-    conn.commit()
-    conn.close()
+
 
 #need to write a method to update DB every 5 mins     
 db_update()   
