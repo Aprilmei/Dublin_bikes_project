@@ -65,7 +65,6 @@ def station_rds(file):
 
     return 
 
-#create_table()
-#station_rds("Dublin.json")   
-for row in connectDB.execute("SELECT * FROM dynamic_info WHERE number=42"):
-        print(row)
+create_table()
+station_rds("Dublin.json")   
+
