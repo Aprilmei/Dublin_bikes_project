@@ -14,131 +14,96 @@ import os
 import sqlite3
 import urllib.request
 
-from flask import Flask, request, session, g, redirect, url_for, abort, \
+from flask import Flask, g, jsonify
+from flask import Flask, jsonify, request, session, g, redirect, url_for, abort, \
      render_template, flash
+from sqlalchemy import *
+
+from db_related.api_read import *
+
+from db_related.db_info import *
+
+import simplejson as json
 
 
 #This Python program creates DB and only run at the first.
 #Everytime it will delete the old DB and create a new one 
-app = Flask(__name__) # create the application instance :)
-app.config.from_object(__name__) # load config from this file , flaskr.py
+app = Flask(__name__) 
+# create the application instance :)
 
 # Load default config and override config from an environment variable
-app.config.update(dict(
-    DATABASE=os.path.join(app.root_path, 'flaskr.db'),
-    SECRET_KEY='development key',
-    USERNAME='admin',
-    PASSWORD='default'
-))
-app.config.from_envvar('FLASKR_SETTINGS', silent=True)
+
+
+def connect_to_database():
+    engine = create_engine("mysql+mysqldb://{}:{}@{}:{}/{}".format(name,password,rds_host,port,db_name ),echo=True)
+
+    return engine
+
+def get_db():                                                                                                                                                                                                                                                       
+    engine = getattr(g, 'engine', None)                                                                                                                                                                                                                              
+    if engine is None:                                                                                                                                                                                                                                                  
+        engine = g.engine = connect_to_database()                                                                                                                                                                                                                    
+    return engine 
+
+@app.route("/available/<int:station_id>")
+def get_stations(station_id):
+    engine = get_db()
+    data = []
+    rows = engine.execute("SELECT available_bikes from dynamic_info where number = {};".format(station_id))
+    for row in rows:
+        data.append(dict(row))
+
+    return json.dumps(available=data)
 
 
 
-def connect_db():
-    """Connects to the specific database."""
-    rv = sqlite3.connect(app.config['DATABASE'])
-    rv.row_factory = sqlite3.Row
-    return rv
+@app.route('/station/<int:station_id>')
+def station(station_id):
+    # show the station with the given id, the id is an integer
+
+    # this line would just return a simple string echoing the station_id
+    # return 'Retrieving info for Station: {}'.format(station_id)
+
+    # select the station info from the db
+    sql = """
+    select * from station_info where number = {}
+    """.format(station_id)
+    engine = get_db() 
+    rows = engine.execute(sql).fetchall()  # we use fetchall(), but probably there is only one station
+    res = [dict(row.items()) for row in rows]  # use this formula to turn the rows into a list of dicts
+    return jsonify(data=res)  # jsonify turns the objects into the correct respose
 
 
-
-
-
-def get_db():
-    """Opens a new database connection if there is none yet for the
-    current application context.
-    """
-    if not hasattr(g, 'sqlite_db'):
-        g.sqlite_db = connect_db()
-    return g.sqlite_db
-
-
-@app.teardown_appcontext
-def close_db(error):
-    """Closes the database again at the end of the request."""
-    if hasattr(g, 'sqlite_db'):
-        g.sqlite_db.close()
-        
-        
-        
-def init_db():
-    buffer = open("C:/Users/Daniele/workspaceComp30670/Dublin_bikes_project2/flaskr/flaskr/Dublin.json").read()
-    station_data=json.loads(buffer)
-    db = get_db()
-    with app.open_resource('schema.sql', mode='r') as f:
-        db.cursor().executescript(f.read())
-        for i,line in enumerate(station_data):
-            db.execute("INSERT INTO station_info VALUES (?,?,?,?,?,?) ",(i,line["number"],line["name"],line["address"],line["latitude"],line["longitude"]))
-        db_update()
-    db.commit()
-    
-
-
-
-@app.cli.command('initdb')
-def initdb_command():
-    """Initializes the database."""
-    init_db()
-    print('Initialized the database.')
-    
-    
 @app.route('/')
 def show_entries():
-    db = get_db()
-    cur = db.execute('SELECT * FROM station_info')
-    station_info = cur.fetchall()
-    cur2 = db.execute('SELECT * FROM dynamic_info')
-    dynamic_info = cur2.fetchall()
+    sql1 = """
+    SELECT * FROM station_info
+    """
+    sql2 = """
+    SELECT * FROM dynamic_info
+    """
+    engine = get_db()
+    station_info = engine.execute(sql1).fetchall()
+    dynamic_info = engine.execute(sql2).fetchall()
     return render_template('show_entries.html', station_info=station_info,dynamic_info=dynamic_info)
 
 
-def data_url():
-    api_key="8589319d92f1dd6754044ae453f8732f5009d77f"
-    link="https://api.jcdecaux.com/vls/v1/stations?contract=Dublin&apiKey={0}".format(api_key)
-    req=urllib.request.urlopen(link)
-    req_response = req.read().decode('utf-8')
-    content=json.loads(req_response)
-    return content
-
-def db_update():
-    db = get_db()
-    db.commit()
-    read=data_url()
-    for i,line in enumerate(read):
-        db.execute("INSERT INTO dynamic_info VALUES (?,?,?,?,?,?,?) ",(i,line["number"],line["status"],line["bike_stands"],
-                                                                   line["available_bike_stands"],line["available_bikes"],line["last_update"]))
-    db.commit()
 
 @app.cli.command('db_update')
 def db_update_command():
     """Updates the database."""
     db_update()
     print('Database updated.')
-
-
-
-
-
-
-
-
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    error = None
-    if request.method == 'POST':
-        if request.form['username'] != app.config['USERNAME']:
-            error = 'Invalid username'
-        elif request.form['password'] != app.config['PASSWORD']:
-            error = 'Invalid password'
-        else:
-            session['logged_in'] = True
-            flash('You were logged in')
-            return redirect(url_for('show_entries'))
-    return render_template('login.html', error=error)
-
-@app.route('/logout')
-def logout():
-    session.pop('logged_in', None)
-    flash('You were logged out')
-    return redirect(url_for('show_entries'))
+    
+    
+    
+if __name__ == "__main__":
+    """
+    The URLs you should visit after starting the app:
+    http://1270.0.0.1/
+    http://1270.0.0.1/hello
+    http://1270.0.0.1/user
+    http://1270.0.0.1/dbinfo
+    http://1270.0.0.1/station/42
+    """
+    app.run(debug=True)

@@ -52,4 +52,4 @@ def db_update():
 
 
 #need to write a method to update DB every 5 mins     
-db_update()   
+#db_update()   
