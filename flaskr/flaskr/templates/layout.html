@@ -9,7 +9,12 @@
 	<style>
 	
 	#map {
-		height:100%;
+		display:block;
+	    height:500px;
+	    width:900px;
+	    margin: 0 auto;
+	    max-width:900px;
+	    box-sizing: border-box;
 	}
 	
 	html, body {
@@ -27,13 +32,26 @@
 		<script>
 		
 			var map;
+			var mapCanvas;
+			
 			function initMap() {
-				
-				map = new google.maps.Map(document.getElementById("map"), {
-					center: {lat: -34.397, lng: 150.644},
-					zoom: 8
 					
-				});
+				mapCanvas = document.getElementById("map");
+					
+				var mapOptions = {
+				panControl: true,
+				zoomControl: true,
+				mapTypeControl: true,
+				scaleControl: true,
+				streetViewControl: true,
+				overviewMapControl: true,
+				rotateControl: true,
+				center: {lat: 53.344083, lng: -6.267015},
+				zoom: 13
+				    
+				};
+					
+				var map = new google.maps.Map(mapCanvas, mapOptions);
 				
 			}
 		
