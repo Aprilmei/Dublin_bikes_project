@@ -48,8 +48,15 @@ def db_update():
 
     for row in connectDB.execute("SELECT * FROM dynamic_info WHERE number=42"):
         print(row)
-    
 
+def station(station_id):    
+    data = []
+    rows = connectDB.execute("SELECT available_bikes from dynamic_info where number = {};".format(station_id))
+    for row in rows:
+        data.append(dict(row))
+    print(data)
 
 #need to write a method to update DB every 5 mins     
-#db_update()   
+#db_update()  
+station(12)
+ 

@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+
+	<head> 
+	
+	<title> Simple map </title>
+	<meta name ="viewport" content="initial-scale=1.0">
+	<meta charset="utf-8">
+	<style>
+	
+	#map {
+		display:block;
+	    height:500px;
+	    width:900px;
+	    margin: 0 auto;
+	    max-width:900px;
+	    box-sizing: border-box;
+	}
+	
+	html, body {
+		
+		height: 100%;
+		margin:0;
+		padding:0;
+	}
+	
+	</style>
+	
+	<body> 
+	
+		<div id="map"> </div>
+		<script>
+		
+			var map;
+			var mapCanvas;
+			
+			function initMap() {
+					
+				mapCanvas = document.getElementById("map");
+					
+				var mapOptions = {
+				panControl: true,
+				zoomControl: true,
+				mapTypeControl: true,
+				scaleControl: true,
+				streetViewControl: true,
+				overviewMapControl: true,
+				rotateControl: true,
+				center: {lat: 53.344083, lng: -6.267015},
+				zoom: 13  
+				};	
+				var map = new google.maps.Map(mapCanvas, mapOptions);
+				
+			}
+
+		</script>
+		
+		<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrfrNjwY0sHKDOFgPcORCx6xRrLzBtgbI&callback=initMap" 
+		> </script>
+        
+        <script src="{{ url_for('static',filename='jquery-3.2.0.min.js') }}"></script>
+        <script src="{{ url_for('static',filename='lodash.js') }}"></script>
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+        <script type=text/javascript> $SCRIPT_ROOT = {{ request.script_root|tojson|safe }}; </script>
+        
+        
+        <script type="text/javascript">
+            
+            window.onload=function showStationMarkers() {
+            var jqxhr = $.getJSON($SCRIPT_ROOT + "/stations", function(data) {
+            var stations = data.stations;
+            console.log('stations', stations);
+                
+            _.forEach(stations, function(station) {
+            console.log(parseFloat(station.latitude), station.longitude,station.number);
+                
+            var marker = new google.maps.Marker({
+            position : {
+            lat : parseFloat(station.latitude),
+            lng : parseFloat(station.longitude)
+            },
+            map : map,
+            title : station.name,
+            station_number : station.number
+            });
+            contentString = '<div id="content"><h1>' + station.name + '</h1></div>';
+            google.maps.event.addListener(marker, 'click', function() {
+            drawInfoWindowChart(this);
+            });
+                })
+            })
+            // draw markers
+            
+            .fail(function() {
+            console.log( "error" );
+                // draw markers
+            
+           })
+            }
+            
+            
+            
+            
+                 
+
+            </script>
+	
+	</body>
+	</head>
+</html>

@@ -37,11 +37,13 @@ except:
 #dialect+driver://username:password@host:port/database
 # mysql-python
 #engine = create_engine('mysql+mysqldb://scott:tiger@localhost/foo')
-connectDB=create_engine("mysql+mysqldb://{}:{}@{}:{}/{}".format(name,password,rds_host,port,db_name ),echo=True)
+connectDB=create_engine("mysql+mysqldb://{}:{}@{}:{}/{}".format(name,password,rds_host,port,db_name),echo=True)
 
 def create_table():
-    sql_1="""CREATE TABLE IF NOT EXISTS station_info (number int, name text, address text, latitude int, longitude int)
+    #Create the station information 
+    sql_1="""CREATE TABLE IF NOT EXISTS station_info (number int, name text, address text, latitude long, longitude long)
 """
+ # check if the table 
     try:
         res = connectDB.execute("DROP TABLE IF EXISTS station_info")
         res = connectDB.execute(sql_1)
