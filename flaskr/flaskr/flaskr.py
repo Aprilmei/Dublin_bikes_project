@@ -1,14 +1,8 @@
 '''
-Created on 23 Mar 2017
+Created on 31 Mar 2017
 
-@author: Daniele
+@author: April
 '''
-'''
-Created on 21 Mar 2017
-
-@author: Daniele
-'''
-# all the imports
 import json
 import os
 import sqlite3
@@ -18,46 +12,61 @@ from flask import Flask, g, jsonify
 from flask import Flask, jsonify, request, session, g, redirect, url_for, abort, \
      render_template, flash
 from sqlalchemy import *
-
-from db_related.api_read import *
-
+import functools
 from db_related.db_info import *
 
-import simplejson as json
-
-
-#This Python program creates DB and only run at the first.
-#Everytime it will delete the old DB and create a new one 
-app = Flask(__name__) 
-# create the application instance :)
-
-# Load default config and override config from an environment variable
-
+app = Flask(__name__)
 
 def connect_to_database():
-    engine = create_engine("mysql+mysqldb://{}:{}@{}:{}/{}".format(name,password,rds_host,port,db_name ),echo=True)
-
+    engine=create_engine("mysql+mysqldb://{}:{}@{}:{}/{}".format(name,password,rds_host,port,db_name),echo=True)
     return engine
 
-def get_db():                                                                                                                                                                                                                                                       
-    engine = getattr(g, 'engine', None)                                                                                                                                                                                                                              
-    if engine is None:                                                                                                                                                                                                                                                  
-        engine = g.engine = connect_to_database()                                                                                                                                                                                                                    
-    return engine 
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = connect_to_database()
+        return db
 
-@app.route("/available/<int:station_id>")
-def get_stations(station_id):
+
+
+@app.route('/')
+def root():
+    return render_template('index.html')
+
+
+@app.route("/stations")
+@functools.lru_cache(maxsize=128)
+def get_stations():
+    engine = get_db()
+    sql = "select * from station_info;"
+    rows = engine.execute(sql).fetchall()
+    print('#found {} stations', len(rows))
+    return jsonify(stations=[dict(row.items()) for row in rows]) #
+
+
+
+
+
+
+
+
+
+
+
+
+
+@app.route("/<int:station_id>")
+def get_station(station_id):
     engine = get_db()
     data = []
     rows = engine.execute("SELECT available_bikes from dynamic_info where number = {};".format(station_id))
     for row in rows:
         data.append(dict(row))
 
-    return json.dumps(available=data)
+    return jsonify(available=data)
 
 
-
-@app.route('/station/<int:station_id>')
+@app.route('/<int:station_id>')
 def station(station_id):
     # show the station with the given id, the id is an integer
 
@@ -73,30 +82,6 @@ def station(station_id):
     res = [dict(row.items()) for row in rows]  # use this formula to turn the rows into a list of dicts
     return jsonify(data=res)  # jsonify turns the objects into the correct respose
 
-
-@app.route('/')
-def show_entries():
-    sql1 = """
-    SELECT * FROM station_info
-    """
-    sql2 = """
-    SELECT * FROM dynamic_info
-    """
-    engine = get_db()
-    station_info = engine.execute(sql1).fetchall()
-    dynamic_info = engine.execute(sql2).fetchall()
-    return render_template('show_entries.html', station_info=station_info,dynamic_info=dynamic_info)
-
-
-
-@app.cli.command('db_update')
-def db_update_command():
-    """Updates the database."""
-    db_update()
-    print('Database updated.')
-    
-    
-    
 if __name__ == "__main__":
     """
     The URLs you should visit after starting the app:
