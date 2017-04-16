@@ -4,105 +4,22 @@
 <head>
 
 <title>Simple map</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 <meta name="viewport" content="initial-scale=1.0">
 <meta charset="utf-8">
-<style>
-#map {
-	display: block;
-	height: 500px;
-	width: 900px;
-	margin: 0 auto;
-	max-width: 900px;
-	box-sizing: border-box;
-}
-
-html, body {
-	height: 100%;
-	margin: 0;
-	padding: 0;
-}
-</style>
 <body>
 
-	<div id="map"></div>
-	<script>
-		
-			var map;
-			var mapCanvas;
-			
-			function initMap() {
-					
-				mapCanvas = document.getElementById("map");
-					
-				var mapOptions = {
-				panControl: true,
-				zoomControl: true,
-				mapTypeControl: true,
-				scaleControl: true,
-				streetViewControl: true,
-				overviewMapControl: true,
-				rotateControl: true,
-				center: {lat: 53.344083, lng: -6.267015},
-				zoom: 13  
-				};	
-				var map = new google.maps.Map(mapCanvas, mapOptions);
-				//calling markers functio paasing map variable
-				showStationMarkers(map);
-			}
 
-		</script>
+<div id="map"></div>
+	
 
-	<script async defer
-		src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrfrNjwY0sHKDOFgPcORCx6xRrLzBtgbI&callback=initMap"> </script>
+<script> $SCRIPT_ROOT = {{ request.script_root|tojson|safe }}; </script>
+<script type="text/javascript" src="{{ url_for('static', filename='map.js') }}"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrfrNjwY0sHKDOFgPcORCx6xRrLzBtgbI&callback=initMap"> </script>
+<script src="{{ url_for('static',filename='jquery-3.2.0.min.js') }}"></script>
+<script src="{{ url_for('static',filename='lodash.js') }}"></script>
+<script src="https://www.gstatic.com/charts/loader.js"></script>
 
-	<script src="{{ url_for('static',filename='jquery-3.2.0.min.js') }}"></script>
-	<script src="{{ url_for('static',filename='lodash.js') }}"></script>
-	<script type="text/javascript"
-		src="https://www.gstatic.com/charts/loader.js"></script>
-	<script type=text/javascript> $SCRIPT_ROOT = {{ request.script_root|tojson|safe }}; </script>
-
-
-	<script type="text/javascript">
-            
-        
-        	
-        
-	        function showStationMarkers( map) {
-	        	alert("yt");
-	        	var jqxhr = $.getJSON($SCRIPT_ROOT + "/stations", function(data) {
-	        	alert("vv");
-	        	
-	        		stations = data.stations;
-	        		// draw markers
-
-	        		
-		        _.forEach(stations, function(station) {
-		        	console.log(station.name, station.number);
-		    
-		        	var marker = new google.maps.Marker({
-		        		position : {
-		        		lat : parseFloat(station.latitude),
-		        		lng : parseFloat(station.longitude)
-		        		},
-		        	map : map,
-		        	title : station.name,
-		        	station_number : station.number
-		        	});
-		        })
-	        		
-	        		})
-	        	.fail(function() {
-	        		console.log( "error" );
-	        	})
-	        }
-                
-
-            
-            
-            
-                 
-
-            </script>
 
 </body>
 </head>
