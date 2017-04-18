@@ -12,7 +12,11 @@ import urllib.request
 import requests
 from sqlalchemy import create_engine
 
-from db_related.db_info import *
+rds_host = 'dubbiker.ci278m5m2zts.us-west-2.rds.amazonaws.com'
+name = "awsuserad"
+password = "Rds4DubBike"
+db_name = "dubbiker"
+port = 3306
 
 
 connectDB=create_engine("mysql+mysqldb://{}:{}@{}:{}/{}".format(name,password,rds_host,port,db_name ),echo=True)
