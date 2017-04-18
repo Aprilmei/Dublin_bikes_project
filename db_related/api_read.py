@@ -5,11 +5,15 @@
 #here is the guide I followed
 #https://maxhalford.github.io/blog/bike-stations/
 
-import requests
 import json
+import time
 import urllib.request
+
+import requests
 from sqlalchemy import create_engine
+
 from db_related.db_info import *
+
 
 connectDB=create_engine("mysql+mysqldb://{}:{}@{}:{}/{}".format(name,password,rds_host,port,db_name ),echo=True)
 
@@ -58,5 +62,12 @@ def station(station_id):
 
 #need to write a method to update DB every 5 mins     
 #db_update()  
-station(12)
+
+def main():
+    while True:
+        db_update()
+        time.sleep(5*60)
+            
  
+if __name__ == "__main__":
+    main()
