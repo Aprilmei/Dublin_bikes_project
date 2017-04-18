@@ -3,17 +3,22 @@ Created on 31 Mar 2017
 
 @author: April
 '''
+import functools
 import json
 import os
 import sqlite3
 import urllib.request
+import pandas as pd
 
 from flask import Flask, g, jsonify
 from flask import Flask, jsonify, request, session, g, redirect, url_for, abort, \
      render_template, flash
 from sqlalchemy import *
-import functools
+
+import numpy
+
 from db_related.db_info import *
+
 
 app = Flask(__name__)
 
@@ -43,18 +48,6 @@ def get_stations():
     print('#found {} stations', len(rows))
     return jsonify(stations=[dict(row.items()) for row in rows]) #
 
-
-
-
-
-
-
-
-
-
-
-
-
 @app.route("/<int:station_id>")
 def get_station(station_id):
     engine = get_db()
@@ -81,6 +74,21 @@ def station(station_id):
     rows = engine.execute(sql).fetchall()  # we use fetchall(), but probably there is only one station
     res = [dict(row.items()) for row in rows]  # use this formula to turn the rows into a list of dicts
     return jsonify(data=res)  # jsonify turns the objects into the correct respose
+
+
+
+@app.route("/occupancy/<int:station_id>")
+def get_occupancy(station_id):
+    engine = get_db()
+    df = pd.read_sql_query("select * from dynamic_info where number = %(number)s", engine, params={"number": station_id})
+    df['last_update_date'] = pd.to_datetime(df.last_update, unit='ms')
+    df.set_index('last_update_date', inplace=True)
+    res = df['available_bike_stands'].resample('1d').mean()
+    #res['dt'] = df.index
+    print("this is res",res)
+    return jsonify(data=json.dumps(list(zip(map(lambda x:x.isoformat(), res.index), res.values))))
+
+
 
 if __name__ == "__main__":
     """
