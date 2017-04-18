@@ -52,7 +52,7 @@ def create_table():
         print(e)
     
     sql_2="""
-    CREATE TABLE IF NOT EXISTS dynamic_info (number int, status text, bike_stands int, available_bike_stands int, available_bikes int, last_update timestamp)
+    CREATE TABLE IF NOT EXISTS dynamic_info (number int, status text, bike_stands int, available_bike_stands int, available_bikes int, last_update VARCHAR(256))
     """
     connectDB.execute(sql_2)
 
@@ -67,6 +67,6 @@ def station_rds(file):
 
     return 
 
-create_table()
+#create_table()
 station_rds("Dublin.json")   
 
