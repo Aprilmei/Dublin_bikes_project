@@ -83,7 +83,7 @@ def get_occupancy(station_id):
     df = pd.read_sql_query("select * from dynamic_info where number = %(number)s", engine, params={"number": station_id})
     df['last_update_date'] = pd.to_datetime(df.last_update, unit='ms')
     df.set_index('last_update_date', inplace=True)
-    res = df['available_bike_stands'].resample('1d').mean()
+    res = df['available_bike_stands'].resample('1h').mean()
     #res['dt'] = df.index
     print("this is res",res)
     return jsonify(data=json.dumps(list(zip(map(lambda x:x.isoformat(), res.index), res.values))))
