@@ -1,5 +1,9 @@
+//map.js displays map and markers. refer to map2.js for displaying of table
+
 var map;
 var mapCanvas;
+
+
 
 //google.charts.load('current', {'packages': ['corechart'], 'callback': drawInfoWindowChart});
 
@@ -19,7 +23,7 @@ function initMap() {
 	zoom: 13  
 	};	
 	var map = new google.maps.Map(mapCanvas, mapOptions);
-	//calling markers functio paasing map variable
+	//calling markers function passing map variable
 	showStationMarkers(map);
 }
 
@@ -52,6 +56,7 @@ function showStationMarkers(map) {
     	
     	google.maps.event.addListener(marker, 'click', function() {
     		alert("event listener");
+    		//calling function to draw column chart in map2.js onclick of a marker
     		drawInfoWindowChart(this);
     		});
 
@@ -59,40 +64,11 @@ function showStationMarkers(map) {
 		
 		})
 	.fail(function() {
-		console.log( "error" );
+		console.log( "error showStationMarkers" );
 	})
 }
 
 
-function drawInfoWindowChart(marker) {
-	
-	alert("drawinfowindowchart");
-	var jqxhrt = $.getJSON($SCRIPT_ROOT + "/occupancy/" + marker.station_number, function(data) {
-		alert("inside");
-		data = JSON.parse(data.data);
-		console.log('data', data);
-		var node = document.getElementById('chart_div');
-		var infowindow = new google.maps.InfoWindow();
-		var chart = new google.visualization.ColumnChart(node);
-		console.log('node',node)
-		var chart_data = new google.visualization.DataTable();
-		chart_data.addColumn('datetime', 'Time of Day');
-		chart_data.addColumn('number', '#');
-		
-		_.forEach(data, function(row){
-			chart_data.addRow([new Date(row[0]), row[1]]);
-		})
-		
-		chart.draw(chart_data, options);
-		infowindow.setContent(node);
-		infowindow.open(marker.getMap(), marker);
-	})
-	
-	.fail(function() {
-			console.log( "error" );
-	})
-				
-	
-}
+
 	
 
