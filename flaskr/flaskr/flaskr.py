@@ -43,37 +43,17 @@ def root():
 @functools.lru_cache(maxsize=128)
 def get_stations():
     engine = get_db()
-    sql = "select * from station_info;"
-    rows = engine.execute(sql).fetchall()
-    print('#found {} stations', len(rows))
-    return jsonify(stations=[dict(row.items()) for row in rows]) #
-
-@app.route("/<int:station_id>")
-def get_station(station_id):
-    engine = get_db()
-    data = []
-    rows = engine.execute("SELECT available_bikes from dynamic_info where number = {};".format(station_id))
-    for row in rows:
-        data.append(dict(row))
-
-    return jsonify(available=data)
-
-
-@app.route('/<int:station_id>')
-def station(station_id):
-    # show the station with the given id, the id is an integer
-
-    # this line would just return a simple string echoing the station_id
-    # return 'Retrieving info for Station: {}'.format(station_id)
-
-    # select the station info from the db
     sql = """
-    select * from station_info where number = {}
-    """.format(station_id)
-    engine = get_db() 
-    rows = engine.execute(sql).fetchall()  # we use fetchall(), but probably there is only one station
-    res = [dict(row.items()) for row in rows]  # use this formula to turn the rows into a list of dicts
-    return jsonify(data=res)  # jsonify turns the objects into the correct respose
+    SELECT *
+    FROM dynamic_info as d1
+    JOIN station_info as s
+    ON d1.number = s.number
+    WHERE last_update = (SELECT MAX(last_update) FROM dynamic_info d2 WHERE d1.number = d2.number)
+    GROUP BY d1.number;
+    """
+    rows = engine.execute(sql).fetchall()
+    print('#found {} latest_occupancy_stations', len(rows))
+    return jsonify(stations=[dict(row.items()) for row in rows])
 
 
 
@@ -84,9 +64,8 @@ def get_occupancy(station_id):
     df['last_update_date'] = pd.to_datetime(df.last_update, unit='ms')
     df.set_index('last_update_date', inplace=True)
     res = df['available_bike_stands'].resample('1h').mean()
-    #res['dt'] = df.index
-    print("this is res",res)
     return jsonify(data=json.dumps(list(zip(map(lambda x:x.isoformat(), res.index), res.values))))
+
 
 
 
