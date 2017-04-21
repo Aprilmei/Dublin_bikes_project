@@ -12,11 +12,6 @@ function initMap() {
 	var mapOptions = {
 	panControl: true,
 	zoomControl: true,
-	mapTypeControl: true,
-	scaleControl: true,
-	streetViewControl: true,
-	overviewMapControl: true,
-	rotateControl: true,
 	center: {lat: 53.344083, lng: -6.267015},
 	zoom: 13  
 	};	
@@ -29,36 +24,44 @@ function initMap() {
 
 
 function showStationMarkers(map) {
-	alert("yt");
 	var jqxhr = $.getJSON($SCRIPT_ROOT + "/stations", function(data) {
-	alert("vv");
 	
 		stations = data.stations;
-		// draw markers
+		// loading standard green icon, improves speed later on.
+		var image_green = "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
+		var image_red = "http://maps.google.com/mapfiles/ms/icons/red-dot.png";
 		
+		console.log('received station markers');
+		console.log("stations", stations);
     _.forEach(stations, function(station) {
-    	console.log(station.name, station.number);
-
+    	
     	var marker = new google.maps.Marker({
     		position : {
     		lat : parseFloat(station.latitude),
     		lng : parseFloat(station.longitude)
     		},
     	map : map,
+    	//change icon dynamically based on available bike_stands
+    	icon : {
+    		
+    		url: station.available_bike_stands == 0 ? image_red : image_green,
+    	},
     	optimized: false,
     	title : station.name,
     	station_number : station.number
     	});
     	
+    	//change colour of markers depending on bike stands occupancy
+    	//changeColorMarkers(station.available_bike_stands,marker);
+    	
+    	
+    	//listening in for a click event: show bike stands occupancy chart
     	google.maps.event.addListener(marker, 'click', function() {
-    	   console.log("marker",marker)
- 		   alert("clicked a marker");
+    		
 		   //calling function to draw the table with statistics about marker
     		drawInfoWindowChart(marker);
     		});
     	
-    	
-    	contentString = '<div id="content"><h1>' + station.name + '</h1></div>' + '<div id="station_availability"></div>';
 
     })
 		
@@ -71,23 +74,24 @@ function showStationMarkers(map) {
 
 
 
-
+// function to draw bike stands occupancy chart below google map
 function drawInfoWindowChart(marker) {
 	
 	var jqxhr = $.getJSON($SCRIPT_ROOT + "/occupancy/" + marker.station_number,
 			function(data) {
 			data = JSON.parse(data.data);
-			console.log('data', data);
 			
+			//initialising and populating the data table
 			var chart_data = new google.visualization.DataTable();
 			chart_data.addColumn('datetime', 'Time of Day');
 			chart_data.addColumn('number', '#');
 			_.forEach(data, function(row){
+				//each row contains a date and the bike stands occupancy
 				chart_data.addRow([new Date(row[0]), row[1]]);
 				})
 				
 	      var options = {
-	        title: 'Bikes availability today',
+	        title: 'Bike stands availability today',
 	        width: 1200,
 	        height: 300,
 	        
@@ -107,9 +111,11 @@ function drawInfoWindowChart(marker) {
 			chart.draw(chart_data,options);
 
 	})
+	.fail(function() {
+		console.log( "error drawInfoWindowChart" );
+	})
 }
 
 
 
-	
-	 
+
