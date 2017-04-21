@@ -49,13 +49,6 @@ def db_update():
     for line in read:
         connectDB.execute("INSERT IGNORE INTO dynamic_info VALUES (%s,%s,%s,%s,%s,%s) ",(line.get("number"),line.get("status"),line.get("bike_stands"),
                                                                    line.get("available_bike_stands"),line.get("available_bikes"),line.get("last_update")))
-    for row in connectDB.execute("SELECT * FROM dynamic_info"):
-        print(row)
-    
-    #check how many times we updated db from Dublin BIKE 
-
-    for row in connectDB.execute("SELECT * FROM dynamic_info WHERE number=42"):
-        print(row)
 
 def station(station_id):    
     data = []
