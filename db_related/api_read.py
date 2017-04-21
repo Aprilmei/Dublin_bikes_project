@@ -47,7 +47,7 @@ read=data_url()
 def db_update():
     read=data_url()
     for line in read:
-        connectDB.execute("INSERT INTO dynamic_info VALUES (%s,%s,%s,%s,%s,%s) ",(line.get("number"),line.get("status"),line.get("bike_stands"),
+        connectDB.execute("INSERT IGNORE INTO dynamic_info VALUES (%s,%s,%s,%s,%s,%s) ",(line.get("number"),line.get("status"),line.get("bike_stands"),
                                                                    line.get("available_bike_stands"),line.get("available_bikes"),line.get("last_update")))
     for row in connectDB.execute("SELECT * FROM dynamic_info"):
         print(row)
