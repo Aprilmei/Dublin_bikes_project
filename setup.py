@@ -7,9 +7,9 @@ setup(name="DublinBike",
       author="Mei Fangxue",
       author_email="sanchiyou@msn.cn",
       licence="GPL3",
-      packages=['dublinbike'],
+      packages=['flaskr'],
       entry_points={
-          'console_scripts':['dublinbike=flaskr.flaskr:main']
+          'console_scripts':['flaskr=flaskr.flaskr:main']
           }
       #Github  https://github.com/Aprilmei/Assignment3.git
       )
