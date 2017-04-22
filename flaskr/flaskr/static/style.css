@@ -1,14 +1,27 @@
 #map {
-	display: block;
 	height: 500px;
-	width: 900px;
-	margin: 0 auto;
-	max-width: 900px;
-	box-sizing: border-box;
-}
-
+    width:700px; 
+    margin:0px auto;
+      }
+     
 html, body {
 	height: 100%;
-	margin: 0;
-	padding: 0;
+    margin: 0;
+    padding: 0;
+      }
+      
+#legend {
+	font-family: Arial, sans-serif;
+    background: #fff;
+    padding: 10px;
+    margin: 10px;
+    border: 3px solid #000;
+}
+
+#legend h3 {
+	margin-top: 0;
+}
+
+#legend img {
+	vertical-align: middle;
 }
