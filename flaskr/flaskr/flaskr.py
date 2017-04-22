@@ -3,21 +3,19 @@ Created on 31 Mar 2017
 
 @author: April
 '''
+import datetime
 import functools
 import json
 import os
 import sqlite3
 import urllib.request
-import pandas as pd
-
 from flask import Flask, g, jsonify
 from flask import Flask, jsonify, request, session, g, redirect, url_for, abort, \
      render_template, flash
 from sqlalchemy import *
-
-import numpy
-
 from db_related.db_info import *
+import numpy as np
+import pandas as pd
 
 
 app = Flask(__name__)
@@ -43,6 +41,7 @@ def root():
 @functools.lru_cache(maxsize=128)
 def get_stations():
     engine = get_db()
+    #join station and dynamic data table on latest updated time (for dynamic data)
     sql = """
     SELECT *
     FROM dynamic_info as d1
@@ -63,19 +62,20 @@ def get_occupancy(station_id):
     df = pd.read_sql_query("select * from dynamic_info where number = %(number)s", engine, params={"number": station_id})
     df['last_update_date'] = pd.to_datetime(df.last_update, unit='ms')
     df.set_index('last_update_date', inplace=True)
+    
+    #display only entries 3 days ago to today
+    end = datetime.datetime.now()
+    start = end - datetime.timedelta(days=3)
+    df = df[start:end]
+    # take mean of entries within each hour
     res = df['available_bike_stands'].resample('1h').mean()
-    return jsonify(data=json.dumps(list(zip(map(lambda x:x.isoformat(), res.index), res.values))))
-
+    res2 = df['available_bikes'].resample('1h').mean()
+    #some entries become NaN after resample and mean, res.fillna is useful to convert them to 0 and jsonify everything without problems
+    res.fillna(0,inplace=True)
+    res2.fillna(0,inplace=True)
+    return jsonify(data=json.dumps(list(zip(map(lambda x:x.isoformat(), res.index), res.values, res2.values))))
 
 
 
 if __name__ == "__main__":
-    """
-    The URLs you should visit after starting the app:
-    http://1270.0.0.1/
-    http://1270.0.0.1/hello
-    http://1270.0.0.1/user
-    http://1270.0.0.1/dbinfo
-    http://1270.0.0.1/station/42
-    """
     app.run(debug=True)
