@@ -81,4 +81,4 @@ if __name__ == "__main__":
     http://1270.0.0.1/dbinfo
     http://1270.0.0.1/station/42
     """
-    app.run(debug=True)
+    app.run(host='0.0.0.0',debug=True)
