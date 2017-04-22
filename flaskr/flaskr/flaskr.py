@@ -17,11 +17,15 @@ from sqlalchemy import *
 
 import numpy
 
-from db_related.db_info import *
+#from db_related.db_info import *
 
 
 app = Flask(__name__)
-
+rds_host = 'dubbiker.ci278m5m2zts.us-west-2.rds.amazonaws.com'
+name = "awsuserad"
+password = "Rds4DubBike"
+db_name = "dubbiker"
+port = 3306
 def connect_to_database():
     engine=create_engine("mysql+mysqldb://{}:{}@{}:{}/{}".format(name,password,rds_host,port,db_name),echo=True)
     return engine
