@@ -65,11 +65,8 @@ def get_occupancy(station_id):
     df.set_index('last_update_date', inplace=True)
     res = df['available_bike_stands'].resample('1h').mean()
     return jsonify(data=json.dumps(list(zip(map(lambda x:x.isoformat(), res.index), res.values))))
-
-def main():
-     app.run(debug=True)
      
-
+     
 
 if __name__ == "__main__":
     """
@@ -80,4 +77,4 @@ if __name__ == "__main__":
     http://1270.0.0.1/dbinfo
     http://1270.0.0.1/station/42
     """
-    main()
+    app.run(debug=True)
