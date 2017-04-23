@@ -13,7 +13,7 @@ from flask import Flask, g, jsonify
 from flask import Flask, jsonify, request, session, g, redirect, url_for, abort, \
      render_template, flash
 from sqlalchemy import *
-from db_related.db_info import *
+#from db_related.db_info import *
 import numpy as np
 import pandas as pd
 
@@ -85,4 +85,4 @@ def get_occupancy(station_id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)
