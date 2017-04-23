@@ -143,19 +143,19 @@ function drawBikeMarker(bike_stands,available_bikes) {
 	
 	if (proportion < 0.33) {
 		
-		return "/static/images/bikes/red_bike.PNG";
+		return "/static/images/red_bike.PNG";
 		
 	}
 	
 	else if (proportion > 0.33 && proportion < 0.66) {
 		
-		return "/static/images/bikes/yellow_bike.PNG";
+		return "/static/images/yellow_bike.PNG";
 		
 	}
 	
 	else {
 		
-		return "/static/images/bikes/green_bike.PNG";
+		return "/static/images/green_bike.PNG";
 		
 	}
 	
@@ -201,15 +201,15 @@ function legendInit() {
     var icons = {
             red_bike: {
               name: '0-33% Available Bikes',
-              icon: "/static/images/bikes/red_bike.PNG"
+              icon: "/static/images/red_bike.PNG"
             },
             yellow_bike: {
               name: '33-66% Available Bikes',
-              icon: "/static/images/bikes/yellow_bike.PNG"
+              icon: "/static/images/yellow_bike.PNG"
             },
             green_bike: {
               name: '66-100% Available Bikes',
-              icon: "/static/images/bikes/green_bike.PNG"
+              icon: "/static/images/green_bike.PNG"
             }
           };
 	
