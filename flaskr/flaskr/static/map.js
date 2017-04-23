@@ -224,7 +224,7 @@ function legendInit() {
       legend.appendChild(div);
     }
 
-    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(legend);
+    //map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(legend);
 	
 }
 
