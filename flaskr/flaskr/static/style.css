@@ -1,7 +1,8 @@
 #map {
 	height: 500px;
-    width:700px; 
-    margin:0px auto;
+    width:815px; 
+    padding: 0 12px;
+    margin-left: 90px;
       }
      
 html, body {
@@ -24,4 +25,11 @@ html, body {
 
 #legend img {
 	vertical-align: middle;
+}
+
+.keepwordinmiddle {
+	margin: 0 auto;
+	padding: 0 12px;
+	width: 960px;
+	margin-left: 80px;
 }

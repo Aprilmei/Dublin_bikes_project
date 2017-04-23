@@ -3,7 +3,10 @@
 
 <head>
 
-<title>Simple map</title>
+<meta charset=utf-8 />
+<meta name="Dublin Bikes" content="Dubin Bike Tracker">
+ 
+<title>Dublin Bike Tracker</title>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 <meta name="viewport" content="initial-scale=1.0">
 <meta charset="utf-8">
@@ -16,6 +19,14 @@
 </head>
 
 <body>
+ <div class="keepwordinmiddle">
+        <header>
+            <h1>Dublin Bike Tracker</h1>
+<!--    Picture from: "http://www.dublinbikes.ie/"   -->
+            <img src= "/static/images/CCZDB-Bandeau.jpg" ></img>
+        </header>
+        </div>
+        
 <div id="map"></div>
 <div id="legend"><h3>Legend</h3></div>
 <div id="chart_div"> </div>
