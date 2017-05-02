@@ -16,6 +16,11 @@ from sqlalchemy import *
 #from db_related.db_info import *
 import numpy as np
 import pandas as pd
+import time
+import atexit
+
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
 
 
 app = Flask(__name__)
@@ -44,7 +49,8 @@ def root():
     return render_template('index.html')
 
 
-@app.route("/stations")
+@app.route("/stations", methods=['GET'])
+
 @functools.lru_cache(maxsize=128)
 def get_stations():
     engine = get_db()
@@ -54,8 +60,10 @@ def get_stations():
     FROM dynamic_info as d1
     JOIN station_info as s
     ON d1.number = s.number
-    WHERE last_update = (SELECT MAX(last_update) FROM dynamic_info d2 WHERE d1.number = d2.number)
-    GROUP BY d1.number;
+    WHERE (d1.number,d1.last_update) IN 
+    (select number, MAX(last_update)
+    from dynamic_info as d2
+    group by number) 
     """
     rows = engine.execute(sql).fetchall()
     print('#found {} latest_occupancy_stations', len(rows))
@@ -63,7 +71,7 @@ def get_stations():
 
 
 
-@app.route("/occupancy/<int:station_id>")
+@app.route("/occupancy/<int:station_id>", methods=['GET'])
 def get_occupancy(station_id):
     engine = get_db()
     df = pd.read_sql_query("select * from dynamic_info where number = %(number)s", engine, params={"number": station_id})
@@ -84,5 +92,10 @@ def get_occupancy(station_id):
 
 
 
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True)
+    
+    app.run(debug=True)
+    
+    # Explicitly kick off the background thread
+    
