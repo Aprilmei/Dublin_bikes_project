@@ -19,9 +19,6 @@ import pandas as pd
 import time
 import atexit
 
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.interval import IntervalTrigger
-
 
 app = Flask(__name__)
 
@@ -49,8 +46,8 @@ def root():
     return render_template('index.html')
 
 
+# display markers
 @app.route("/stations", methods=['GET'])
-
 @functools.lru_cache(maxsize=128)
 def get_stations():
     engine = get_db()
@@ -70,7 +67,15 @@ def get_stations():
     return jsonify(stations=[dict(row.items()) for row in rows])
 
 
+#onclick of marker to display info inside
+@app.route("/station_click/<int:station_id>", methods=['GET'])
+def get_station_info(station_id):
+    engine = get_db()
+    df = pd.read_sql_query("SELECT * FROM dynamic_info WHERE number = %(number)s ORDER BY last_update DESC limit 1", engine, params={"number": station_id})
+    return jsonify(marker=df.to_json(orient='records'))
 
+
+# onclick of marker to display the graph
 @app.route("/occupancy/<int:station_id>", methods=['GET'])
 def get_occupancy(station_id):
     engine = get_db()
@@ -91,11 +96,9 @@ def get_occupancy(station_id):
     return jsonify(data=json.dumps(list(zip(map(lambda x:x.isoformat(), res.index), res.values, res2.values))))
 
 
-
-
 if __name__ == "__main__":
     
-    app.run(debug=True)
+    app.run()
     
     # Explicitly kick off the background thread
     

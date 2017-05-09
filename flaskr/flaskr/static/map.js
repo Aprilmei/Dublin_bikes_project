@@ -166,32 +166,48 @@ function drawBikeMarker(bike_stands,available_bikes) {
 
 
 
-function displayWeather(marker,station) {
+//this function shows the station info on click. It calls the function display weather as well in order to load the infoWindow
+function getStationInfo(marker) {
 	
-	//ajax call to openweather API
-    $.ajax({
-    	
-    	// Math.round() to get the specific longitude and latitude
-    	//Personal API key
-        url: "http://api.openweathermap.org/data/2.5/weather?lat=" + (Math.round(marker.getPosition().lat()*1000000)/1000000) + "&lon=" + (Math.round(marker.getPosition().lng()*1000000)/1000000) + "&appid=314b7c76899a9afd33ffb8d575363c29",
-        dataType: 'jsonp',
-        //results contains the json file with all information about weather from API
-        success: function(results) {
-        	
-        	
-	      	var content_stat="<div><h1>Station: "+station.number+"</h1>"+"<p>"
-	      		+station.address+"</p>"+"<p>Available stands: "+station.available_bike_stands
-	      		+"</p>"+"<p>Available bikes: "+station.available_bikes+"</p> <p> <img src='/static/weather/"
-	      		+results.weather[0].icon+".png'> </p> <p> Temperature: " 
-	      		+ Math.round((results.main.temp - 273.15)) + " Celsius</p> </div>";
-	      	
-	    	//listening in for a click event: show bike stands occupancy chart
-	    	//google.maps.event.addListener(marker, 'click', function() 
-			//calling function to draw the table with statistics about marker
-			infowindow.setContent(content_stat);
-			infowindow.open(marker.getMap(), marker);
-        }
-    })
+	var jqxhr = $.getJSON($SCRIPT_ROOT + "/station_click/" + marker.station_number, 
+		function(data) {
+			marker_click = JSON.parse(data.marker_click);
+			displayWeather(marker,marker_click);
+		});
+}
+	
+
+
+
+function displayWeather(marker,marker_click) {
+	
+		//ajax call to openweather API
+	    $.ajax({
+	    	
+	    	// Math.round() to get the specific longitude and latitude
+	    	//Personal API key
+	        url: "http://api.openweathermap.org/data/2.5/weather?lat=" + (Math.round(marker.getPosition().lat()*1000000)/1000000) + "&lon=" + (Math.round(marker.getPosition().lng()*1000000)/1000000) + "&appid=314b7c76899a9afd33ffb8d575363c29",
+	        dataType: 'jsonp',
+	        //results contains the json file with all information about weather from API
+	        success: function(results) {
+	        	
+		      	var content_stat="<div><h1>Station: "+marker_click.number+"</h1>"+"<p>"
+		      		+marker_click.address+"</p>"+"<p>Available stands: "+marker_click.available_bike_stands
+		      		+"</p>"+"<p>Available bikes: "+marker_click.available_bikes+"</p> <p> <img src='/static/weather/"
+		      		+results.weather[0].icon+".png'> </p> <p> Temperature: " 
+		      		+ Math.round((results.main.temp - 273.15)) + " Celsius</p> </div>";
+		      	
+		      	
+		    	//listening in for a click event: show bike stands occupancy chart
+		    	//google.maps.event.addListener(marker, 'click', function() 
+				//calling function to draw the table with statistics about marker
+				infowindow.setContent(content_stat);
+				infowindow.open(marker.getMap(), marker);
+				
+				
+				
+	        }
+	    })
 }
 
 //initialise red,yellow,green bike legend in google map
