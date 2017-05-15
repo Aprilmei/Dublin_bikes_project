@@ -98,7 +98,7 @@ def get_occupancy(station_id):
 
 if __name__ == "__main__":
     
-    app.run()
+    app.run(host='0.0.0.0')
     
     # Explicitly kick off the background thread
     
